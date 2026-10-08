@@ -1,0 +1,66 @@
+plugins {
+    id("com.android.application")
+    id("com.google.gms.google-services")
+}
+
+android {
+    namespace = "com.stoopsave.app"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.stoopsave.app"
+        minSdk = 26
+        targetSdk = 34
+        versionCode = 72
+        versionName = "2.27"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("/home/hatch/workspace/apk-build/stoopsave.keystore")
+            storePassword = new String(java.nio.file.Files.readAllBytes(
+                java.nio.file.Paths.get("/home/hatch/workspace/secrets/stoopsave-keystore.pass"))).trim()
+            keyAlias = "stoopsave"
+            keyPassword = new String(java.nio.file.Files.readAllBytes(
+                java.nio.file.Paths.get("/home/hatch/workspace/secrets/stoopsave-keystore.pass"))).trim()
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            // Debug builds also signed so update-installs keep working.
+            signingConfig = signingConfigs.getByName("release")
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Firebase BOM — consistent versions across firebase-messaging,
+    // firebase-installations, etc. FirebaseInitProvider auto-initializes
+    // from the google-services.json values (no manual init needed).
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-installations")
+
+    // OneSignal push (primary). Manifest entries merge automatically.
+    implementation("com.onesignal:OneSignal:5.10.2")
+
+    implementation("androidx.core:core:1.13.1")
+
+    // ML Kit Document Scanner — on-device flyer/document scanning
+    // (auto edge-detect, perspective correct). Launched from the page via
+    // window.StoopSaveApp.scanDocument(); result delivered as a data URL to
+    // window.onNativeScanResult (or stoopsave:scan-result event).
+    // NOTE: Maven coordinates are play-services-mlkit-document-scanner
+    // (the com.google.mlkit:document-scanner artifact does not exist);
+    // the Java API package is still com.google.mlkit.vision.documentscanner.
+    implementation("com.google.android.gms:play-services-mlkit-document-scanner:16.0.0")
+}

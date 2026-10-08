@@ -1,0 +1,19 @@
+// Top-level build file for the StoopSave Gradle build.
+// Replaces the manual aapt2 script (build-stoopsave-apk.sh) so Firebase
+// gets proper manifest merging + FirebaseInitProvider auto-initialization.
+//
+// NOTE: Uses the buildscript classpath approach (not the plugins DSL) because
+// the Gradle Plugin Portal marker resolution is unreliable through this
+// environment's egress proxy; the artifacts themselves resolve fine from
+// google()/mavenCentral().
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.5.2")
+        classpath("com.google.gms:google-services:4.4.2")
+    }
+}
+// App module applies the plugins (versions from the buildscript classpath above).

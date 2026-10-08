@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">StoopSave</string>
+    <string name="default_web_client_id" translatable="false">557172221011-4vlln7c0jqispumc1bjj050g8leddr96.apps.googleusercontent.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">557172221011</string>
+    <string name="google_api_key" translatable="false">AIzaSyDmbCUMPDzAQEpZ639HNZpiGiWlTEqepro</string>
+    <string name="google_app_id" translatable="false">1:557172221011:android:6b9e5d96d9d9102c5312a6</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDmbCUMPDzAQEpZ639HNZpiGiWlTEqepro</string>
+    <string name="google_storage_bucket" translatable="false">safariai-production.firebasestorage.app</string>
+    <string name="project_id" translatable="false">safariai-production</string>
+    <style name="Theme.StoopSave" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#B23825</item>
+        <item name="android:statusBarColor">#B23825</item>
+        <item name="android:navigationBarColor">#B23825</item>
+    </style>
+</resources>

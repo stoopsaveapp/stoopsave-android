@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "557172221011",
+    "project_id": "safariai-production",
+    "storage_bucket": "safariai-production.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:557172221011:android:6b9e5d96d9d9102c5312a6",
+        "android_client_info": {
+          "package_name": "com.stoopsave.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "557172221011-4vlln7c0jqispumc1bjj050g8leddr96.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmbCUMPDzAQEpZ639HNZpiGiWlTEqepro"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "557172221011-4vlln7c0jqispumc1bjj050g8leddr96.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

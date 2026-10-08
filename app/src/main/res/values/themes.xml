@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.StoopSave" parent="android:Theme.Material.NoActionBar">
+        <!-- Navy: matches the splash screen so launch has no color flash. -->
+        <item name="android:windowBackground">#0A2540</item>
+        <item name="android:statusBarColor">#B23825</item>
+        <item name="android:navigationBarColor">#B23825</item>
+    </style>
+</resources>

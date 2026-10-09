@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import android.view.View;
 import android.widget.TextView;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.Gravity;
 import android.webkit.WebViewClient;
 import android.animation.AnimatorSet;

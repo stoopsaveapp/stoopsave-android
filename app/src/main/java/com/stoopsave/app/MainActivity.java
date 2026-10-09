@@ -60,6 +60,109 @@ import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult;
  */
 public class MainActivity extends Activity {
 
+    /**
+     * Radar splash view (splash-4): concentric rings, expanding pulse,
+     * three blinking deal pins, and the center logo tile.
+     */
+    static class RadarSplashView extends View {
+        private final Paint ringPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint pulsePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint pinPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final Paint centerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private float pulsePhase = 0f; // 0..1
+        private long startTime = 0L;
+        private android.graphics.Bitmap logoBitmap;
+        private final android.os.Handler handler = new android.os.Handler(android.os.Looper.getMainLooper());
+        private final Runnable ticker = new Runnable() {
+            @Override public void run() {
+                long now = android.os.SystemClock.uptimeMillis();
+                if (startTime == 0L) startTime = now;
+                float t = ((now - startTime) % 2000L) / 2000f;
+                pulsePhase = t;
+                invalidate();
+                handler.postDelayed(this, 33); // ~30fps
+            }
+        };
+        // Pin positions (fraction of view size) + colors + blink phase offsets.
+        private final float[][] pins = {
+            {0.60f, 0.30f, 0.4f}, // red, delay .4s
+            {0.32f, 0.62f, 1.1f}, // green, delay 1.1s
+            {0.72f, 0.48f, 1.6f}, // yellow, delay 1.6s
+        };
+        private final int[] pinColors = {0xFFD93A1E, 0xFF3DDC84, 0xFFFFB800};
+
+        RadarSplashView(android.content.Context ctx) {
+            super(ctx);
+            ringPaint.setStyle(Paint.Style.STROKE);
+            ringPaint.setStrokeWidth(dp(2));
+            ringPaint.setColor(0xFF1E4A73);
+            pulsePaint.setStyle(Paint.Style.STROKE);
+            pulsePaint.setStrokeWidth(dp(2));
+            pulsePaint.setColor(0xFF3DDC84);
+            pinPaint.setStyle(Paint.Style.FILL);
+            centerPaint.setStyle(Paint.Style.FILL);
+            centerPaint.setColor(0xFFD93A1E);
+            try {
+                logoBitmap = android.graphics.BitmapFactory.decodeResource(
+                    ctx.getResources(), R.drawable.splash_logo);
+            } catch (Exception ignored) { }
+        }
+        private float dp(float v) {
+            return v * getResources().getDisplayMetrics().density;
+        }
+        void startAnimations() {
+            handler.post(ticker);
+        }
+        void stopAnimations() {
+            handler.removeCallbacks(ticker);
+        }
+        @Override protected void onDetachedFromWindow() {
+            super.onDetachedFromWindow();
+            stopAnimations();
+        }
+        @Override protected void onDraw(android.graphics.Canvas c) {
+            super.onDraw(c);
+            float w = getWidth(), h = getHeight();
+            float cx = w / 2f, cy = h / 2f;
+            float maxR = Math.min(w, h) / 2f;
+            // Three static rings.
+            for (int i = 0; i < 3; i++) {
+                float r = maxR - dp(2) - i * (maxR / 3.4f);
+                if (r > 0) c.drawCircle(cx, cy, r, ringPaint);
+            }
+            // Expanding pulse: scale .3 -> 1.1, alpha 1 -> 0.
+            float pr = maxR * (0.3f + 0.8f * pulsePhase);
+            pulsePaint.setAlpha((int) (255 * (1f - pulsePhase)));
+            c.drawCircle(cx, cy, pr, pulsePaint);
+            pulsePaint.setAlpha(255);
+            // Blinking pins.
+            long now = android.os.SystemClock.uptimeMillis();
+            float pinR = dp(7);
+            for (int i = 0; i < pins.length; i++) {
+                float phase = ((now / 1000f) + pins[i][2]) % 2f / 2f; // 0..1 over 2s
+                float s = (float) (1.0 + 0.5 * Math.sin(phase * Math.PI * 2));
+                float a = (float) (0.75 + 0.25 * Math.cos(phase * Math.PI * 2));
+                pinPaint.setColor(pinColors[i]);
+                pinPaint.setAlpha((int) (255 * a));
+                c.drawCircle(cx + (pins[i][0] - 0.5f) * w,
+                             cy + (pins[i][1] - 0.5f) * h,
+                             pinR * s, pinPaint);
+            }
+            pinPaint.setAlpha(255);
+            // Center logo tile (red rounded square with logo bitmap).
+            float tile = dp(56);
+            float left = cx - tile / 2f, top = cy - tile / 2f;
+            float rr = dp(16);
+            c.drawRoundRect(left, top, left + tile, top + tile, rr, rr, centerPaint);
+            if (logoBitmap != null) {
+                float pad = dp(8);
+                c.drawBitmap(logoBitmap, null,
+                    new android.graphics.RectF(left + pad, top + pad,
+                        left + tile - pad, top + tile - pad), null);
+            }
+        }
+    }
+
     private static final String HOME_URL = "https://stoopsave.com/app";
     private static final int FILE_CHOOSER_REQUEST = 2001;
     private static final int CAMERA_REQUEST_CODE = 2002;
@@ -83,6 +186,7 @@ public class MainActivity extends Activity {
     // deliver a refresh to the live activity (or stash it for next launch).
     private String fcmToken = "";
     private View splashView;
+    private RadarSplashView radarSplashView;
     // Splash logo pulse animator, cancelled when the first page finishes.
     private AnimatorSet splashPulse;
     private boolean splashHiding;
@@ -141,8 +245,9 @@ public class MainActivity extends Activity {
 
         FrameLayout root = new FrameLayout(this);
 
-        // Splash: navy branded screen with the animated StoopSave logo,
-        // shown while the WebView loads its first page.
+        // Splash: radar pulse (splash-4) — navy screen with animated radar rings,
+        // expanding pulse, blinking deal pins, center logo, wordmark + tagline.
+        // Shown while the WebView loads its first page.
         FrameLayout splash = new FrameLayout(this);
         splash.setBackgroundColor(Color.parseColor("#0A2540"));
         FrameLayout.LayoutParams splashParams = new FrameLayout.LayoutParams(
@@ -160,59 +265,61 @@ public class MainActivity extends Activity {
         splashInner.setLayoutParams(innerParams);
 
         final float density = getResources().getDisplayMetrics().density;
-        ImageView logo = new ImageView(this);
-        logo.setImageResource(R.drawable.splash_logo);
-        int logoPx = (int) (176 * density);
-        LinearLayout.LayoutParams logoParams =
-            new LinearLayout.LayoutParams(logoPx, logoPx);
-        logo.setLayoutParams(logoParams);
+        // Radar custom view (220dp square): rings + pulse + pins + center logo.
+        RadarSplashView radarView = new RadarSplashView(this);
+        int radarPx = (int) (220 * density);
+        LinearLayout.LayoutParams radarParams =
+            new LinearLayout.LayoutParams(radarPx, radarPx);
+        radarView.setLayoutParams(radarParams);
 
         TextView wordmark = new TextView(this);
         wordmark.setText("StoopSave");
         wordmark.setTextSize(30);
-        wordmark.setTextColor(Color.parseColor("#F5EFE3"));
+        wordmark.setTypeface(wordmark.getTypeface(), android.graphics.Typeface.BOLD);
+        wordmark.setTextColor(Color.parseColor("#FFF8EE"));
         wordmark.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams wordParams = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT);
-        wordParams.topMargin = (int) (20 * density);
+        wordParams.topMargin = (int) (26 * density);
         wordmark.setLayoutParams(wordParams);
 
-        splashInner.addView(logo);
+        TextView tagline = new TextView(this);
+        tagline.setText("Deals near you, right now");
+        tagline.setTextSize(13);
+        tagline.setTextColor(Color.parseColor("#9FB3C8"));
+        tagline.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams tagParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT);
+        tagParams.topMargin = (int) (8 * density);
+        tagline.setLayoutParams(tagParams);
+
+        splashInner.addView(radarView);
         splashInner.addView(wordmark);
+        splashInner.addView(tagline);
         splash.addView(splashInner);
         splashView = splash;
+        radarSplashView = radarView;
+        radarView.startAnimations();
 
-        // Entrance: logo fades in and scales up, wordmark follows slightly later.
-        logo.setAlpha(0f);
-        logo.setScaleX(0.85f);
-        logo.setScaleY(0.85f);
+        // Entrance: radar + wordmark fade up.
+        radarView.setAlpha(0f);
         wordmark.setAlpha(0f);
+        tagline.setAlpha(0f);
         AnimatorSet entrance = new AnimatorSet();
-        ObjectAnimator logoAlpha = ObjectAnimator.ofFloat(logo, View.ALPHA, 0f, 1f);
-        ObjectAnimator logoScaleX = ObjectAnimator.ofFloat(logo, View.SCALE_X, 0.85f, 1f);
-        ObjectAnimator logoScaleY = ObjectAnimator.ofFloat(logo, View.SCALE_Y, 0.85f, 1f);
+        ObjectAnimator radarAlpha = ObjectAnimator.ofFloat(radarView, View.ALPHA, 0f, 1f);
         ObjectAnimator wordAlpha = ObjectAnimator.ofFloat(wordmark, View.ALPHA, 0f, 1f);
-        logoAlpha.setDuration(450);
-        logoScaleX.setDuration(450);
-        logoScaleY.setDuration(450);
+        ObjectAnimator tagAlpha = ObjectAnimator.ofFloat(tagline, View.ALPHA, 0f, 1f);
+        radarAlpha.setDuration(450);
         wordAlpha.setDuration(400);
         wordAlpha.setStartDelay(180);
-        entrance.playTogether(logoAlpha, logoScaleX, logoScaleY, wordAlpha);
+        tagAlpha.setDuration(400);
+        tagAlpha.setStartDelay(270);
+        entrance.playTogether(radarAlpha, wordAlpha, tagAlpha);
         entrance.setInterpolator(new AccelerateDecelerateInterpolator());
         entrance.start();
-
-        // Gentle pulse while the page loads: scale 1.0 -> 1.045 -> 1.0.
-        ObjectAnimator pulseX = ObjectAnimator.ofFloat(logo, View.SCALE_X, 1f, 1.045f, 1f);
-        ObjectAnimator pulseY = ObjectAnimator.ofFloat(logo, View.SCALE_Y, 1f, 1.045f, 1f);
-        pulseX.setDuration(1400);
-        pulseY.setDuration(1400);
-        pulseX.setRepeatCount(ObjectAnimator.INFINITE);
-        pulseY.setRepeatCount(ObjectAnimator.INFINITE);
-        splashPulse = new AnimatorSet();
-        splashPulse.playTogether(pulseX, pulseY);
-        splashPulse.setStartDelay(500);
-        splashPulse.start();
+        // splashPulse unused for radar (its internal animators loop instead).
 
         webView = new WebView(this);
 
@@ -281,6 +388,10 @@ public class MainActivity extends Activity {
                     if (splashPulse != null) {
                         splashPulse.cancel();
                         splashPulse = null;
+                    }
+                    if (radarSplashView != null) {
+                        radarSplashView.stopAnimations();
+                        radarSplashView = null;
                     }
                     splashView.animate().alpha(0f).setDuration(250)
                         .withEndAction(new Runnable() {

@@ -11,8 +11,8 @@ android {
         applicationId = "com.stoopsave.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 74
-        versionName = "2.29"
+        versionCode = 75
+        versionName = "2.30"
     }
 
     signingConfigs {

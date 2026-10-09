@@ -237,10 +237,6 @@ public class MainActivity extends Activity {
         // player ID is available as early as possible.
         try {
             OneSignal.initWithContext(this, "3f1470be-8762-407d-a39a-5bd313e6cd34");
-            // OneSignal 5.x: this triggers the permission prompt AND registers
-            // the player with OneSignal's servers. Without it, initWithContext
-            // alone never creates a push subscription.
-            OneSignal.getNotifications().requestPermission(true);
         } catch (Throwable t) {
             android.util.Log.w("StoopSave", "OneSignal init failed", t);
         }

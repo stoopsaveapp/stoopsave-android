@@ -26,6 +26,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.Gravity;
 import android.webkit.WebViewClient;
+import android.app.DownloadManager;
+import android.os.Environment;
+import android.webkit.URLUtil;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -420,6 +423,33 @@ public class MainActivity extends Activity {
                         + "location.reload();})();",
                         null);
                 }
+            }
+        });
+
+        // PDF/report downloads: hand downloadable files to Android's
+        // DownloadManager. Without this, download taps silently do nothing.
+        webView.setDownloadListener(new android.webkit.DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent,
+                                        String contentDisposition, String mimeType,
+                                        long contentLength) {
+                try {
+                    DownloadManager.Request request =
+                            new DownloadManager.Request(Uri.parse(url));
+                    String fileName = URLUtil.guessFileName(url, contentDisposition, mimeType);
+                    request.setTitle(fileName);
+                    request.setDescription("StoopSave report");
+                    request.setMimeType(mimeType);
+                    request.setNotificationVisibility(
+                            DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    request.setDestinationInExternalPublicDir(
+                            Environment.DIRECTORY_DOWNLOADS, fileName);
+                    DownloadManager dm = (DownloadManager)
+                            getSystemService(DOWNLOAD_SERVICE);
+                    if (dm != null) {
+                        dm.enqueue(request);
+                    }
+                } catch (Exception ignored) {}
             }
         });
 

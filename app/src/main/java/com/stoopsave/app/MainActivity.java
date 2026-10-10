@@ -242,6 +242,26 @@ public class MainActivity extends Activity {
             OneSignal.initWithContext(this, "3f1470be-8762-407d-a39a-5bd313e6cd34");
             // OneSignal 5.x: initWithContext handles the permission prompt;
             // no explicit requestPermission call (API varies by 5.x patch).
+            // Deep-link routing: when a notification with a URL is tapped,
+            // load it in the WebView instead of losing it.
+            OneSignal.getNotifications().addClickListener(event -> {
+                String url = null;
+                try {
+                    if (event.getNotification() != null) {
+                        url = event.getNotification().getLaunchURL();
+                    }
+                } catch (Exception ignored) {}
+                if (url != null && url.startsWith("https://stoopsave.com/app")) {
+                    final String target = url;
+                    runOnUiThread(() -> {
+                        if (webView != null) {
+                            webView.loadUrl(target);
+                        } else {
+                            pendingDeepLink = target;
+                        }
+                    });
+                }
+            });
         } catch (Throwable t) {
             android.util.Log.w("StoopSave", "OneSignal init failed", t);
         }
@@ -387,6 +407,14 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                // If a notification deep-link arrived before the WebView was
+                // ready, load it now.
+                if (pendingDeepLink != null) {
+                    final String target = pendingDeepLink;
+                    pendingDeepLink = null;
+                    view.loadUrl(target);
+                    return;
+                }
                 // Native feel: fade the splash out, stop pull-to-refresh spinner
                 if (splashView != null && splashView.getVisibility() == View.VISIBLE
                         && !splashHiding) {

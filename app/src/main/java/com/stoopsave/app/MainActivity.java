@@ -760,6 +760,35 @@ public class MainActivity extends Activity {
                     }
                 });
             }
+            @android.webkit.JavascriptInterface
+            public void downloadFile(final String url, final String filename) {
+                // Native download via DownloadManager. The page calls this
+                // instead of relying on WebView navigation + DownloadListener,
+                // which is unreliable for authenticated PDF URLs.
+                runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                        try {
+                            DownloadManager.Request request =
+                                    new DownloadManager.Request(Uri.parse(url));
+                            String name = (filename != null && !filename.isEmpty())
+                                    ? filename
+                                    : URLUtil.guessFileName(url, null, "application/pdf");
+                            request.setTitle(name);
+                            request.setDescription("StoopSave report");
+                            request.setMimeType("application/pdf");
+                            request.setNotificationVisibility(
+                                    DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                            request.setDestinationInExternalPublicDir(
+                                    Environment.DIRECTORY_DOWNLOADS, name);
+                            DownloadManager dm = (DownloadManager)
+                                    getSystemService(DOWNLOAD_SERVICE);
+                            if (dm != null) {
+                                dm.enqueue(request);
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                });
+            }
         }, "StoopSaveApp");
 
         // FCM push: initialize Firebase and fetch the registration token.

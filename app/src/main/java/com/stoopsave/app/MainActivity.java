@@ -240,9 +240,8 @@ public class MainActivity extends Activity {
         // player ID is available as early as possible.
         try {
             OneSignal.initWithContext(this, "3f1470be-8762-407d-a39a-5bd313e6cd34");
-            // OneSignal 5.x: explicitly request permission to trigger player
-            // registration. initWithContext alone doesn't register without this.
-            OneSignal.getNotifications().requestPermission();
+            // OneSignal 5.x: initWithContext handles the permission prompt;
+            // no explicit requestPermission call (API varies by 5.x patch).
         } catch (Throwable t) {
             android.util.Log.w("StoopSave", "OneSignal init failed", t);
         }

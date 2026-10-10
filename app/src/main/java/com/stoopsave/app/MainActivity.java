@@ -244,24 +244,31 @@ public class MainActivity extends Activity {
             // no explicit requestPermission call (API varies by 5.x patch).
             // Deep-link routing: when a notification with a URL is tapped,
             // load it in the WebView instead of losing it.
-            OneSignal.getNotifications().addClickListener(event -> {
-                String url = null;
-                try {
-                    if (event.getNotification() != null) {
-                        url = event.getNotification().getLaunchURL();
-                    }
-                } catch (Exception ignored) {}
-                if (url != null && url.startsWith("https://stoopsave.com/app")) {
-                    final String target = url;
-                    runOnUiThread(() -> {
-                        if (webView != null) {
-                            webView.loadUrl(target);
-                        } else {
-                            pendingDeepLink = target;
+            OneSignal.getNotifications().addClickListener(
+                new com.onesignal.notifications.INotificationClickListener() {
+                    @Override
+                    public void onClick(com.onesignal.notifications.INotificationClickEvent event) {
+                        String url = null;
+                        try {
+                            if (event.getNotification() != null) {
+                                url = event.getNotification().getLaunchURL();
+                            }
+                        } catch (Exception ignored) {}
+                        if (url != null && url.startsWith("https://stoopsave.com/app")) {
+                            final String target = url;
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (webView != null) {
+                                        webView.loadUrl(target);
+                                    } else {
+                                        pendingDeepLink = target;
+                                    }
+                                }
+                            });
                         }
-                    });
-                }
-            });
+                    }
+                });
         } catch (Throwable t) {
             android.util.Log.w("StoopSave", "OneSignal init failed", t);
         }

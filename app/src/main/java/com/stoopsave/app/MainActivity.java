@@ -174,6 +174,7 @@ public class MainActivity extends Activity {
     private static final int SCAN_REQUEST_CODE = 2005;
 
     private WebView webView;
+    private String pendingDeepLink;
     private ValueCallback<Uri[]> filePathCallback;
     private Uri cameraPhotoUri;
     private boolean cameraRequestedBefore;

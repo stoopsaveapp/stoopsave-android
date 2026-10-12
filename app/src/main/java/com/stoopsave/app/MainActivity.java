@@ -243,7 +243,33 @@ public class MainActivity extends Activity {
             OneSignal.initWithContext(this, "3f1470be-8762-407d-a39a-5bd313e6cd34");
             // OneSignal 5.x: initWithContext handles the permission prompt;
             // no explicit requestPermission call (API varies by 5.x patch).
-
+            // Deep-link routing: the backend sends a launch URL with every
+            // push (?free=1 for free items, ?digest=1 for the digest). Load
+            // it in the WebView on tap; if the WebView isn't up yet, stash
+            // it in pendingDeepLink (consumed in onPageFinished).
+            OneSignal.getNotifications().addClickListener(
+                new com.onesignal.notifications.INotificationClickListener() {
+                    @Override
+                    public void onClick(com.onesignal.notifications.INotificationClickEvent event) {
+                        String url = null;
+                        try {
+                            if (event != null && event.getNotification() != null) {
+                                url = event.getNotification().getLaunchURL();
+                            }
+                        } catch (Throwable ignored) {}
+                        if (url == null || !url.startsWith("https://stoopsave.com/app")) return;
+                        final String target = url;
+                        runOnUiThread(new Runnable() {
+                            @Override public void run() {
+                                if (webView != null) {
+                                    webView.loadUrl(target);
+                                } else {
+                                    pendingDeepLink = target;
+                                }
+                            }
+                        });
+                    }
+                });
         } catch (Throwable t) {
             android.util.Log.w("StoopSave", "OneSignal init failed", t);
         }
@@ -820,10 +846,15 @@ public class MainActivity extends Activity {
             }
         } catch (Exception ignored) { }
 
-        if (savedInstanceState != null) {
-            webView.restoreState(savedInstanceState);
-        } else if (!handleAuthDeepLink(getIntent()) && !handleAppLink(getIntent())) {
-            webView.loadUrl(HOME_URL);
+        // A deep-link intent (notification tap) always wins over state
+        // restore — otherwise a warm-restored activity silently drops the
+        // link and the user lands wherever they left off.
+        if (!handleAuthDeepLink(getIntent()) && !handleAppLink(getIntent())) {
+            if (savedInstanceState != null) {
+                webView.restoreState(savedInstanceState);
+            } else {
+                webView.loadUrl(HOME_URL);
+            }
         }
     }
 

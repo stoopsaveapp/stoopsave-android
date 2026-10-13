@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:557172221011:android:6b9e5d96d9d9102c5312a6",
         "android_client_info": {
-          "package_name": "com.stoopsave.app"
+          "package_name": "com.stoopsave.sandbox"
         }
       },
       "oauth_client": [

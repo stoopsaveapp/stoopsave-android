@@ -167,7 +167,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private static final String HOME_URL = "https://stoopsave.com/app";
+    private static final String HOME_URL = "https://stoopsave-sandbox-557172221011.us-central1.run.app/app";
     private static final int FILE_CHOOSER_REQUEST = 2001;
     private static final int CAMERA_REQUEST_CODE = 2002;
     private static final int LOCATION_REQUEST_CODE = 2003;
@@ -257,7 +257,7 @@ public class MainActivity extends Activity {
                                 url = event.getNotification().getLaunchURL();
                             }
                         } catch (Throwable ignored) {}
-                        if (url == null || !url.startsWith("https://stoopsave.com/app")) return;
+                        if (url == null || !url.startsWith("https://stoopsave-sandbox-557172221011.us-central1.run.app/app")) return;
                         final String target = url;
                         runOnUiThread(new Runnable() {
                             @Override public void run() {
@@ -403,7 +403,7 @@ public class MainActivity extends Activity {
                 // Keep the app on stoopsave.com over HTTPS; hand anything else
                 // to the system. Plain http is not allowed (HSTS aside, the
                 // app must never downgrade itself).
-                if (url != null && url.startsWith("https://stoopsave.com")) {
+                if (url != null && url.startsWith("https://stoopsave-sandbox-557172221011.us-central1.run.app")) {
                     return false;
                 }
                 try {
@@ -448,7 +448,7 @@ public class MainActivity extends Activity {
                 // then reload so the client boots signed in. The flag is
                 // cleared before the async inject so the reload can't loop.
                 if (pendingOAuthSession != null && url != null
-                        && url.startsWith("https://stoopsave.com")) {
+                        && url.startsWith("https://stoopsave-sandbox-557172221011.us-central1.run.app")) {
                     String raw = pendingOAuthSession;
                     pendingOAuthSession = null;
                     String esc = raw.replace("\\", "\\\\").replace("'", "\\'");
@@ -972,7 +972,7 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * Handles Android App Links (https://stoopsave.com/app...), e.g. from
+     * Handles Android App Links (https://stoopsave-sandbox-557172221011.us-central1.run.app/app...), e.g. from
      * push-notification taps. Loads the link URL directly in the WebView
      * so the user lands on the right screen (e.g. ?digest=1 opens the
      * weekly digest view) instead of the browser. Returns true when handled.
@@ -983,7 +983,7 @@ public class MainActivity extends Activity {
         if (!Intent.ACTION_VIEW.equals(action)) return false;
         Uri data = intent.getData();
         if (data == null || !"https".equals(data.getScheme())
-                || !"stoopsave.com".equals(data.getHost())) {
+                || !"stoopsave-sandbox-557172221011.us-central1.run.app".equals(data.getHost())) {
             return false;
         }
         String path = data.getPath();

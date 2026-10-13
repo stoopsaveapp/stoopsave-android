@@ -59,7 +59,7 @@ public class StoopSaveMessagingService extends FirebaseMessagingService {
 
         Intent open;
         if (deepLinkUrl != null && !deepLinkUrl.isEmpty()
-                && deepLinkUrl.startsWith("https://stoopsave.com/app")) {
+                && deepLinkUrl.startsWith("https://stoopsave-sandbox-557172221011.us-central1.run.app/app")) {
             // Deep link (e.g. ?digest=1): fire as ACTION_VIEW so
             // MainActivity.handleAppLink routes it into the WebView.
             open = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(deepLinkUrl));

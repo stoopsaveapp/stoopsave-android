@@ -8,11 +8,11 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.stoopsave.app"
+        applicationId = "com.stoopsave.sandbox"
         minSdk = 26
         targetSdk = 36
-        versionCode = 79
-        versionName = "1.0"
+        versionCode = 1
+        versionName = "1.1-sandbox.1"
     }
 
     signingConfigs {

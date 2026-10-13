@@ -47,7 +47,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="stoopsave" android:host="auth" />
+                <data android:scheme="stoopsave-sandbox" android:host="auth" />
             </intent-filter>
             <!-- App Links: push-notification taps (e.g. the weekly digest at
                  https://stoopsave.com/app?digest=1) open in the APK instead

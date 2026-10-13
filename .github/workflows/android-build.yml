@@ -51,24 +51,6 @@ jobs:
       - name: Upload release APK
         uses: actions/upload-artifact@v4
         with:
-          name: StoopSave-release-apk
+          name: StoopSave-sandbox-apk
           path: app/build/outputs/apk/release/*.apk
-          if-no-files-found: error
-
-      - name: Build release AAB (Google Play) with Gradle
-        uses: gradle/gradle-build-action@v3
-        with:
-          gradle-version: 8.7
-          arguments: |
-            bundleRelease
-            -Pandroid.injected.signing.store.file=${{ github.workspace }}/app/stoopsave.keystore
-            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }}
-            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }}
-            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
-
-      - name: Upload release AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: StoopSave-release-aab
-          path: app/build/outputs/bundle/release/*.aab
           if-no-files-found: error

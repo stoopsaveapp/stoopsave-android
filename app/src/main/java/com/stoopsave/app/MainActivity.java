@@ -950,7 +950,7 @@ public class MainActivity extends Activity {
     private boolean handleAuthDeepLink(Intent intent) {
         if (intent == null) return false;
         Uri data = intent.getData();
-        if (data == null || !"stoopsave".equals(data.getScheme())
+        if (data == null || !"stoopsave-sandbox".equals(data.getScheme())
                 || !"auth".equals(data.getHost())) {
             return false;
         }

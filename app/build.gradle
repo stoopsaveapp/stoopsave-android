@@ -11,8 +11,8 @@ android {
         applicationId = "com.stoopsave.sandbox"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.1-sandbox.3"
+        versionCode = 4
+        versionName = "1.1-sandbox.4"
     }
 
     signingConfigs {

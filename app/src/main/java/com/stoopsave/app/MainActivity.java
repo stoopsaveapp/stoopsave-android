@@ -278,6 +278,22 @@ public class MainActivity extends Activity {
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 
         FrameLayout root = new FrameLayout(this);
+        // Red status-bar strip on every Android version: Android 15+ draws
+        // edge-to-edge and ignores the theme's statusBarColor, so paint the
+        // root brand red and seat all content below the status-bar inset —
+        // the strip behind the system icons is then the app's own red bar,
+        // matching the navigation bar.
+        root.setBackgroundColor(Color.parseColor("#B23825"));
+        root.setOnApplyWindowInsetsListener((v, insets) -> {
+            int topInset;
+            if (android.os.Build.VERSION.SDK_INT >= 30) {
+                topInset = insets.getInsets(android.view.WindowInsets.Type.statusBars()).top;
+            } else {
+                topInset = insets.getSystemWindowInsetTop();
+            }
+            v.setPadding(0, topInset, 0, 0);
+            return insets;
+        });
 
         // Splash: radar pulse (splash-4) — navy screen with animated radar rings,
         // expanding pulse, blinking deal pins, center logo, wordmark + tagline.

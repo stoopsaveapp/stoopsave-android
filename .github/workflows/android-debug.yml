@@ -19,7 +19,10 @@ jobs:
         with:
           gradle-version: '8.7'
       - name: Build debug APK
-        run: ./gradlew assembleDebug
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: '8.7'
+          arguments: assembleDebug
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:

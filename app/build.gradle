@@ -21,9 +21,10 @@ android {
             // (see .github/workflows/android-build.yml). Falls back to local paths for dev builds.
             def keystorePath = findProperty("android.injected.signing.store.file")
                 ?: "/home/hatch/workspace/apk-build/stoopsave.keystore"
+            def keystorePassFile = new File("/home/hatch/workspace/secrets/stoopsave-keystore.pass")
             def keystorePass = findProperty("android.injected.signing.store.password")
-                ?: new String(java.nio.file.Files.readAllBytes(
-                    java.nio.file.Paths.get("/home/hatch/workspace/secrets/stoopsave-keystore.pass"))).trim()
+                ?: (keystorePassFile.exists() ? new String(java.nio.file.Files.readAllBytes(
+                    java.nio.file.Paths.get("/home/hatch/workspace/secrets/stoopsave-keystore.pass"))).trim() : "")
             def keyAliasVal = findProperty("android.injected.signing.key.alias") ?: "stoopsave"
             def keyPassVal = findProperty("android.injected.signing.key.password") ?: keystorePass
             storeFile = file(keystorePath)
@@ -38,8 +39,7 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
         debug {
-            // Debug builds also signed so update-installs keep working.
-            signingConfig = signingConfigs.getByName("release")
+            // Debug builds use Gradle's default debug keystore, not the release signing config.
         }
     }
 

@@ -167,7 +167,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private static final String HOME_URL = "https://stoopsave.com/app";
+    private static final String HOME_URL = "https://stoopsave-sandbox-557172221011.us-central1.run.app/app";
     private static final int FILE_CHOOSER_REQUEST = 2001;
     private static final int CAMERA_REQUEST_CODE = 2002;
     private static final int LOCATION_REQUEST_CODE = 2003;
@@ -416,10 +416,10 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                // Keep the app on stoopsave.com over HTTPS; hand anything else
+                // Keep the app on stoopsave.com or the sandbox host over HTTPS; hand anything else
                 // to the system. Plain http is not allowed (HSTS aside, the
                 // app must never downgrade itself).
-                if (url != null && url.startsWith("https://stoopsave.com")) {
+                if (url != null && (url.startsWith("https://stoopsave.com") || url.startsWith("https://stoopsave-sandbox-557172221011.us-central1.run.app"))) {
                     return false;
                 }
                 try {
